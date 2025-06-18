@@ -6,9 +6,6 @@ import matplotlib.pyplot as plt
 ITERATIONS = 1000
 ALPHA = 0.01
 
-def estimatePrice(mileage, theta0, theta1):
-    return theta0 + (theta1 * mileage)
-
 def plot_step(mileage, price, theta0, theta1, iteration):
     plt.clf()
     plt.scatter(mileage, price, color='blue', label='Data')
@@ -64,7 +61,7 @@ def training():
         show_linear = True
         show_training = True
 
-
+    # -- Normalize data --
     dataset = np.array(dataset, dtype=float)
     mileage = dataset[:, 0]
     price = dataset[:, 1]
@@ -77,13 +74,13 @@ def training():
     mileage_normalized = (mileage - mileage_mean) / mileage_std
     price_normalized = (price - price_mean) / price_std
 
-
+    # -- Calculate theta --
     theta0 = 0.0
     theta1 = 0.0
     for i in range(ITERATIONS):
-        estimatePrice = theta0 + (theta1 * mileage_normalized)
-        theta0 -= (ALPHA * np.sum( estimatePrice - price_normalized ))/len(dataset)
-        theta1 -= (ALPHA * np.sum( (estimatePrice - price_normalized) * mileage_normalized )) / len(dataset)
+        estimated_price = theta0 + (theta1 * mileage_normalized)
+        theta0 -= (ALPHA * np.sum( estimated_price - price_normalized ))/len(dataset)
+        theta1 -= (ALPHA * np.sum( (estimated_price - price_normalized) * mileage_normalized )) / len(dataset)
         if show_training and i % 10 == 0:
             theta1_display = theta1 * (price_std / mileage_std)
             theta0_display = price_mean + price_std * theta0 - theta1_display * mileage_mean
@@ -98,6 +95,7 @@ def training():
         plt.ioff()
         plt.show()
 
+    # -- write final theta in file --
     with open('theta.txt', 'w') as f:
         f.write(str(theta0) + "," + str(theta1))
 
