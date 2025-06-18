@@ -1,4 +1,3 @@
-import sys
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -89,6 +88,12 @@ def training():
     theta1 = theta1 * (price_std / mileage_std)
     theta0 = price_mean + price_std * theta0 - theta1 * mileage_mean
     print("Theta found: T0: ", theta0, ", T1: ", theta1)
+
+    predictions = theta0 + theta1 * mileage
+    mse = np.mean((price - predictions) ** 2)
+    mae = np.mean(np.abs(price - predictions))
+
+    print(f"Precision: MSE: {mse:.2f}, MAE: {mae:.2f}")
 
     if show_linear:
         plot_step(mileage, price, theta0, theta1, ITERATIONS)
