@@ -1,15 +1,34 @@
 import sys
+import argparse
+import numpy as np
+import matplotlib.pyplot as plt
+
+ITERATIONS = 1000
+ALPHA = 0.01
 
 def estimatePrice(mileage, teta0, teta1):
     return teta0 + (teta1 * mileage)
 
-def training():
-    if (len(sys.argv) != 2):
-        print("Usage: python model_training.py <data>")
-        exit(1)
+def plot_step(mileage, price, teta0, teta1, iteration):
+    plt.clf()
+    plt.scatter(mileage, price, color='blue', label='Data')
+
+    x_line = np.linspace(min(mileage), max(mileage), 100)
+    y_line = teta0 + teta1 * x_line
+    plt.plot(x_line, y_line, color='red', label=f'regression for {iteration} iterations')
+
+    plt.title(f"linear regression at iterations {iteration}")
+    plt.xlabel("Mileage")
+    plt.ylabel("Price")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.pause(0.05)
+
+def get_data(filename):
     dataset = []
     try:
-        data = open(sys.argv[1], 'r')
+        data = open(filename, 'r')
         data_line = data.readline()
         while data_line:
             # data_line = data.readline()
@@ -22,21 +41,47 @@ def training():
             data_line = data.readline()
         data.close()
     except:
-        print("Error during training")
+        print("Error during reading file")
+        exit(1)
+    return dataset
+
+def training():
+    if (len(sys.argv) != 2):
+        print("Usage: python model_training.py <data>")
+        exit(1)
+    dataset = get_data(sys.argv[1])
+
+    dataset = np.array(dataset, dtype=float)
+    mileage = dataset[:, 0]
+    price = dataset[:, 1]
+
+    mileage_mean = np.mean(mileage)
+    mileage_std = np.std(mileage)
+    price_mean = np.mean(price)
+    price_std = np.std(price)
+
+    mileage_normalized = (mileage - mileage_mean) / mileage_std
+    price_normalized = (price - price_mean) / price_std
+
 
     teta0 = 0.0
     teta1 = 0.0
-    alpha = 0.0000000001
-    for _ in range(100):
-        sumForTeta0 = 0
-        sumForTeta1 = 0
-        for data2 in dataset:
-            tmp = (estimatePrice(data2[0], teta0, teta1) - data2[1])
-            sumForTeta0 += tmp
-            sumForTeta1 += tmp * data2[0]
-        teta0 -= (alpha * sumForTeta0)/len(dataset)
-        teta1 -= (alpha * sumForTeta1) / len(dataset)
+    for i in range(ITERATIONS):
+        estimatePrice = teta0 + (teta1 * mileage_normalized)
+        teta0 -= (ALPHA * np.sum( estimatePrice - price_normalized ))/len(dataset)
+        teta1 -= (ALPHA * np.sum( (estimatePrice - price_normalized) * mileage_normalized )) / len(dataset)
+        if i % 10 == 0:
+            # Dénormalisation pour affichage
+            teta1_display = teta1 * (price_std / mileage_std)
+            teta0_display = price_mean + price_std * teta0 - teta1_display * mileage_mean
 
+            plot_step(mileage, price, teta0_display, teta1_display, i)
+
+    teta1 = teta1 * (price_std / mileage_std)
+    teta0 = price_mean + price_std * teta0 - teta1 * mileage_mean
+    plot_step(mileage, price, teta0, teta1, ITERATIONS)
+    plt.ioff()
+    plt.show()
     print(teta0, " - ", teta1)
     with open('teta.txt', 'w') as f:
         f.write(str(teta0) + "," + str(teta1))
