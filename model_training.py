@@ -27,7 +27,6 @@ def get_data(filename):
         data = open(filename, 'r')
         data_line = data.readline()
         while data_line:
-            # data_line = data.readline()
             splitedData = data_line.split(',')
             try:
                 nombres = list(map(int, splitedData))
