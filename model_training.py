@@ -28,6 +28,10 @@ def get_data(filename):
         data_line = data.readline()
         while data_line:
             splitedData = data_line.split(',')
+            if (len(splitedData) != 2):
+                print("Bad format of dataline, skipping...")
+                data_line = data.readline()
+                continue
             try:
                 nombres = list(map(int, splitedData))
                 dataset.append(nombres)
@@ -52,6 +56,10 @@ def training():
     args = parser.parse_args()
 
     dataset = get_data(args.data)
+
+    if (len(dataset) < 2):
+        print("To short data to do linear regression")
+        exit(1)
 
     if args.window:
         show_linear = True
