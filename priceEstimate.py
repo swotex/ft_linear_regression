@@ -24,7 +24,7 @@ def estimate_price():
     if userEntry < 0:
         print("error: Is not a valid mileage")
         exit(1)
-    print((thetas[0] + (thetas[1] * userEntry)))
+    print(f"Estimate price: {(thetas[0] + (thetas[1] * userEntry)):.2f}")
 
 if __name__ == '__main__':
     estimate_price()
