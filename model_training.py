@@ -33,7 +33,7 @@ def get_data(filename):
                 data_line = data.readline()
                 continue
             try:
-                nombres = list(map(int, splitedData))
+                nombres = list(map(float, splitedData))
                 dataset.append(nombres)
             except:
                 print("Bad format of dataline, skipping...")
