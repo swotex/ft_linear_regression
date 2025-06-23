@@ -89,7 +89,7 @@ def training():
         estimated_price = tmp_theta0 + (tmp_theta1 * mileage_normalized)
         tmp_theta0 -= (ALPHA * np.sum( estimated_price - price_normalized ))/len(dataset)
         tmp_theta1 -= (ALPHA * np.sum( (estimated_price - price_normalized) * mileage_normalized )) / len(dataset)
-        
+
         theta1 = tmp_theta1 * (price_std / mileage_std)
         theta0 = price_mean + price_std * tmp_theta0 - theta1 * mileage_mean
         if show_training and i % 10 == 0:
@@ -97,6 +97,7 @@ def training():
 
     print("Theta found: T0: ", theta0, ", T1: ", theta1)
 
+    # -- Calculate error --
     predictions = theta0 + theta1 * mileage
     mse = np.mean((price - predictions) ** 2)
     mae = np.mean(np.abs(price - predictions))
