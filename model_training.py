@@ -83,24 +83,25 @@ def training():
     # -- Calculate theta --
     theta0 = 0.0
     theta1 = 0.0
+    tmp_theta0 = 0.0
+    tmp_theta1 = 0.0
     for i in range(ITERATIONS):
-        estimated_price = theta0 + (theta1 * mileage_normalized)
-        theta0 -= (ALPHA * np.sum( estimated_price - price_normalized ))/len(dataset)
-        theta1 -= (ALPHA * np.sum( (estimated_price - price_normalized) * mileage_normalized )) / len(dataset)
+        estimated_price = tmp_theta0 + (tmp_theta1 * mileage_normalized)
+        tmp_theta0 -= (ALPHA * np.sum( estimated_price - price_normalized ))/len(dataset)
+        tmp_theta1 -= (ALPHA * np.sum( (estimated_price - price_normalized) * mileage_normalized )) / len(dataset)
+        
+        theta1 = tmp_theta1 * (price_std / mileage_std)
+        theta0 = price_mean + price_std * tmp_theta0 - theta1 * mileage_mean
         if show_training and i % 10 == 0:
-            theta1_display = theta1 * (price_std / mileage_std)
-            theta0_display = price_mean + price_std * theta0 - theta1_display * mileage_mean
-            plot_step(mileage, price, theta0_display, theta1_display, i)
+            plot_step(mileage, price, theta0, theta1, i)
 
-    theta1 = theta1 * (price_std / mileage_std)
-    theta0 = price_mean + price_std * theta0 - theta1 * mileage_mean
     print("Theta found: T0: ", theta0, ", T1: ", theta1)
 
     predictions = theta0 + theta1 * mileage
     mse = np.mean((price - predictions) ** 2)
     mae = np.mean(np.abs(price - predictions))
 
-    print(f"Precision: MSE: {mse:.2f}, MAE: {mae:.2f}")
+    print(f"Precision: MSE (Mean Squared Error): {mse:.2f}, MAE (Mean Absolute Error): {mae:.2f}")
 
     if show_linear:
         plot_step(mileage, price, theta0, theta1, ITERATIONS)
